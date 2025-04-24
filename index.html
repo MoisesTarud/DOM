@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Agrícola</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h2>Análisis de Condiciones Agrícolas</h2>
+        
+        <div class="input-group">
+            <label for="numLecturas">Número de lecturas:</label>
+            <input type="number" id="numLecturas" min="1" required>
+            <button type="button" onclick="crearFormulario()">Crear entradas</button>
+        </div>
+        
+        <div id="formLecturas"></div>
+        
+        <button type="button" onclick="analizarDatos()">Analizar datos</button>
+        
+        <div id="resultados"></div>
+    </div>
+
+    <script>
+        function crearFormulario() {
+            const num = parseInt(document.getElementById('numLecturas').value);
+            const form = document.getElementById('formLecturas');
+            form.innerHTML = '';
+          
+            for (let i = 0; i < num; i++) {
+                form.innerHTML += `
+                    <div class="lectura">
+                        <h4>Lectura ${i + 1}</h4>
+                        <label>Altura (m.s.n.m):</label>
+                        <input type="number" id="altura${i}" required>
+                        <label>Profundidad (cm):</label>
+                        <input type="number" id="profundidad${i}" required>
+                    </div>
+                `;
+            }
+        }
+        
+        function clasificarAltura(altura) {
+            if (altura >= 400 && altura <= 800) return "Sumamente apto";
+            if (altura < 400 || (altura > 800 && altura <= 999)) return "Moderadamente apto";
+            if (altura >= 1000 && altura <= 1200) return "Marginalmente apto";
+            return "No apto";
+        }
+        
+        function clasificarProfundidad(prof) {
+            if (prof > 100) return "Sumamente apto";
+            if (prof >= 50) return "Moderadamente apto";
+            if (prof >= 25) return "Marginalmente apto";
+            return "No apto";
+        }
+        
+        function peorCategoria(cat1, cat2) {
+            const orden = ["Sumamente apto", "Moderadamente apto", "Marginalmente apto", "No apto"];
+            return orden[Math.max(orden.indexOf(cat1), orden.indexOf(cat2))];
+        }
+        
+        function analizarDatos() {
+            const num = parseInt(document.getElementById('numLecturas').value);
+            let totalAltura = 0, totalProf = 0;
+            let conteo = {
+                "Sumamente apto": 0,
+                "Moderadamente apto": 0,
+                "Marginalmente apto": 0,
+                "No apto": 0
+            };
+          
+            for (let i = 0; i < num; i++) {
+                const altura = parseFloat(document.getElementById(`altura${i}`).value);
+                const prof = parseFloat(document.getElementById(`profundidad${i}`).value);
+              
+                totalAltura += altura;
+                totalProf += prof;
+              
+                const catAltura = clasificarAltura(altura);
+                const catProf = clasificarProfundidad(prof);
+                const peor = peorCategoria(catAltura, catProf);
+                conteo[peor]++;
+            }
+          
+            const promedioAltura = (totalAltura / num).toFixed(2);
+            const promedioProf = (totalProf / num).toFixed(2);
+          
+            let output = `
+                <h3>Resultados del Análisis</h3>
+                <div class="result-item"><strong>Promedio de altura:</strong> ${promedioAltura} m.s.n.m</div>
+                <div class="result-item"><strong>Promedio de profundidad:</strong> ${promedioProf} cm</div>
+            `;
+            
+            for (let key in conteo) {
+                output += `<div class="result-item">${key}: ${conteo[key]}</div>`;
+            }
+          
+            document.getElementById('resultados').innerHTML = output;
+        }
+    </script>
+</body>
+</html>
